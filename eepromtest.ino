@@ -38,19 +38,19 @@ void setup(void) {
   unsigned int address = 0;
   writeEEPROM(address, 123);
   Serial.print(readEEPROM(address), DEC);
-  findLastPoint();
   Serial.println("RUNNING");
   //initTCNT2();
 }
 
 void loop() {
+  findLastPoint();
   // start overwriting data if at end of memory
   if (!(startcount < MAXCOUNT)) startcount = 0;
   Serial.println(startcount);
   for (int i = startcount; i < MAXCOUNT; i++) {
     Serial.flush();
     digitalWrite(9, LOW);
-    if (!sleepWatchdogCount(millis() + 60000)) break;
+    if (!sleepWatchdogCount(millis() + 180000)) break;
     
     Serial.println("A");
     digitalWrite(9, HIGH);

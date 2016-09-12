@@ -22,9 +22,9 @@ boolean sleepWatchdogCount(unsigned long endTime) {
   Serial.print(millis());
   Serial.println();
   Serial.flush();
-  
+
   CLKPR = 0b10000100;
-  
+
   while (millis() < endTime) {
     //Serial.println("A");
     set_sleep_mode(SLEEP_MODE_IDLE);
@@ -38,51 +38,70 @@ boolean sleepWatchdogCount(unsigned long endTime) {
     sleep_disable();
     if (Serial.available()) break;
   }
-  
+
   CLKPR = 0b10000000;
-  
+
   if (Serial.available()) return false;
   return true;
 }
 
+ISR(TIMER2_COMPA_vect) {
+  Serial.println(millis());
+}
 
 void initTCNT2() {
   // manual page 151
-  
+
   // 1/(32760/1024/57586)
-  
-  
+
+
   // Clear interrupts
-  TIMSK2 = (0<<TOIE2) || (0<<OCIE2A) || (0<<OCIE2B);
-  
+  TIMSK2 = (0 << TOIE2) || (0 << OCIE2A) || (0 << OCIE2B);
+
   // Set clock source
-  ASSR |= (0<<AS2);
+  ASSR = 0;
+  ASSR |= (0 << AS2);
   TCCR2B = 0;
-  
+
   // Init counter
   TCNT2 = 0;
-  
+
   OCR2A = 100;
   OCR2B = 0;
-  
+
   TCCR2A = 0;
   TCCR2B = 0;
-  
+
   // check ASSR to ensure writes worked
-  
+
   // wait for TCN2xUB OCR2xUB and TCR2xUB
-  
+
   // clear interrupt flags
   delay(10);
   TIFR2 = 0;
-  
+
   // Start counter
-  TCCR2B = (1<<CS20);
-  ASSR |= (1<<EXCLK);
+  TCCR2B = (1 << CS22) || (1 << CS21) || (1 << CS20);
+  ASSR |= (1 << EXCLK);
   
-  for (int i=0; i<100; i++) {
+  // wait for clock to stabalize
+  Serial.println("Waiting for clock...");
+  delay(1000);
+  
+  
+  Serial.println("enabled interrupts");
+  Serial.flush();
+  // Start interrupts
+  //TIMSK2 |= (1 << TOIE2);
+  delay(1000);
+  
+  // Stop interrupts
+  TIMSK2 = 0;
+  Serial.println("disabled interrupts");
+  Serial.flush();
+  for (int i = 0; i < 100; i++) {
     Serial.println(TCNT2);
-    delay(100);
+    delay(0);
   }
-  
+
 }
