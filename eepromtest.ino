@@ -30,13 +30,13 @@ void setup(void) {
   pinMode(9, OUTPUT);
   Serial.begin(115200);
   Wire.begin();
-  Wire.setClock(400000L);
+  //Wire.setClock(400000L);
   //TWBR = 1;//((CPU_FREQ / TWI_FREQ_NUNCHUCK) - 16) / 2;
   myHumidity.begin();
   digitalWrite(9, !digitalRead(9));
   Serial.println("Starting");
   unsigned int address = 0;
-  writeEEPROM(address, 123);
+  writeEEPROM(address, 170);
   Serial.print(readEEPROM(address), DEC);
   Serial.println("RUNNING");
   //initTCNT2();
@@ -45,12 +45,12 @@ void setup(void) {
 void loop() {
   findLastPoint();
   // start overwriting data if at end of memory
-  if (!(startcount < MAXCOUNT)) startcount = 0;
+  if (startcount >= MAXCOUNT) startcount = 0;
   Serial.println(startcount);
   for (int i = startcount; i < MAXCOUNT; i++) {
     Serial.flush();
     digitalWrite(9, LOW);
-    if (!sleepWatchdogCount(millis() + 180000)) break;
+    if (!sleepWatchdogCount(millis() + 60000)) break;
     
     Serial.println("A");
     digitalWrite(9, HIGH);

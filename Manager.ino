@@ -1,11 +1,18 @@
 void readSensor() {
 
   DataPoint reading;
+  Serial.print(millis());
+  Serial.println("Reading sensor");
+  Serial.flush();
   reading.time = millis();
   reading.humidity = myHumidity.readHumidity();
   reading.temperature = myHumidity.readTemperature();
 
 
+  Serial.print(millis());
+  Serial.println("doner");
+  Serial.flush();
+  
   Serial.print("r: ");
   Serial.print(millis());
   Serial.print(", ");
@@ -22,10 +29,17 @@ void readSensor() {
   char b[datasize];
   memcpy(b, &reading, datasize);
 
+  Serial.print(millis());
+  Serial.println("writing memory");
+  Serial.flush();
   //writeEEPROMBlock(readingCount * datasize, b, datasize);
   for (int i = 0; i < datasize; i++) {
     writeEEPROM(readingCount * datasize + i, b[i]);
   }
+  
+  Serial.print(millis());
+  Serial.println("donew");
+  Serial.flush();
   readingCount++;
 }
 

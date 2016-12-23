@@ -26,7 +26,10 @@ boolean sleepWatchdogCount(unsigned long endTime) {
   CLKPR = 0b10000100;
 
   while (millis() < endTime) {
-    //Serial.println("A");
+    // Serial printing is so so so slow
+    //Serial.println("Z");
+    //Serial.flush();
+    digitalWrite(13, HIGH);
     set_sleep_mode(SLEEP_MODE_IDLE);
     cli();
     sleep_enable();
@@ -36,6 +39,7 @@ boolean sleepWatchdogCount(unsigned long endTime) {
     sleep_cpu();
 
     sleep_disable();
+    digitalWrite(13, LOW);
     if (Serial.available()) break;
   }
 
@@ -50,9 +54,13 @@ ISR(TIMER2_COMPA_vect) {
 }
 
 void initTCNT2() {
-  // manual page 151
-
+  // *tries to* initialize timer2 in accoranace with datasheet page 151 for asynchronous operation
+  // http://www.atmel.com/images/Atmel-8271-8-bit-AVR-Microcontroller-ATmega48A-48PA-88A-88PA-168A-168PA-328-328P_datasheet_Complete.pdf
+  
+  // 1 / (1800 seconds) (half hours per second) = crystal input / 1024 (prescaler) / timer counts
   // 1/(32760/1024/57586)
+  // should let timer count to 57586 = 1,800.0019536 seconds, meaning an error of 0.00011%, which is accurate enough
+  
 
 
   // Clear interrupts
@@ -77,6 +85,7 @@ void initTCNT2() {
   // wait for TCN2xUB OCR2xUB and TCR2xUB
 
   // clear interrupt flags
+  // be lazy and just wait instead of checking
   delay(10);
   TIFR2 = 0;
 
