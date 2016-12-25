@@ -49,9 +49,24 @@ boolean sleepWatchdogCount(unsigned long endTime) {
   return true;
 }
 
-ISR(TIMER2_COMPA_vect) {
-  Serial.println(millis());
+unsigned long time_intervals = 0;
+ISR(TIMER2_OVF_vect) {
+  time_intervals++;
+  digitalWrite(13, !digitalRead(13));
+  Serial.print("Time is ");
+  Serial.println(time_intervals);
+  //TIFR2 = 0;
 }
+
+/* 
+ISR(TIMER2_COMPA_vect) {
+  digitalWrite(13, !digitalRead(13));
+  Serial.println("compare ");
+  //TIFR2 = 0;
+  TCNT2 = 0;
+  //Serial.print("INTERRUPT!!!\t\t");
+  Serial.println(millis());
+}*/
 
 void initTCNT2() {
   // *tries to* initialize timer2 in accoranace with datasheet page 151 for asynchronous operation
@@ -64,36 +79,46 @@ void initTCNT2() {
 
 
   // Clear interrupts
-  TIMSK2 = (0 << TOIE2) || (0 << OCIE2A) || (0 << OCIE2B);
+  TIMSK2 = (0 << TOIE2) | (0 << OCIE2A) | (0 << OCIE2B);
 
   // Set clock source
-  ASSR = 0;
-  ASSR |= (0 << AS2);
+  ASSR &= ~(1 << EXCLK);  // disable arbitrary signal input
+  ASSR |= (1 << AS2);     // run timer2 in asynchronous mode, inputting from 32khz crystal
+  
+  
+  // disable pin waveform output
+  TCCR2A = 0;
+  // stop timer and do not set up waveform generation mode
   TCCR2B = 0;
 
-  // Init counter
+  // Init counter value
   TCNT2 = 0;
-
-  OCR2A = 100;
+  
+  // set output compare registers
+  OCR2A = 17;
   OCR2B = 0;
 
-  TCCR2A = 0;
-  TCCR2B = 0;
 
   // check ASSR to ensure writes worked
-
+  Serial.print("ASSR: ");
+  Serial.println(ASSR, BIN);
+  
+  
+  // clear interrupt flags by writing 1s
+  TIFR2 = (1 << OCF2B) | (1 << OCF2A) | (1 << TOV2);
+  
   // wait for TCN2xUB OCR2xUB and TCR2xUB
-
-  // clear interrupt flags
-  // be lazy and just wait instead of checking
+  // be lazy and just wait a while instead of checking
   delay(10);
-  TIFR2 = 0;
+
 
   // Start counter
-  TCCR2B = (1 << CS22) || (1 << CS21) || (1 << CS20);
-  ASSR |= (1 << EXCLK);
   
-  // wait for clock to stabalize
+  // enable timer and set prescaler to /1024
+  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  TCCR2B = (1 << CS22) | (1 << CS21) | (0 << CS20); // /256 for debug
+  
+  // wait for clock to stabilize
   Serial.println("Waiting for clock...");
   delay(1000);
   
@@ -101,16 +126,42 @@ void initTCNT2() {
   Serial.println("enabled interrupts");
   Serial.flush();
   // Start interrupts
-  //TIMSK2 |= (1 << TOIE2);
-  delay(1000);
+  TIMSK2 |= (1 << TOIE2);
+  //delay(10000);
   
   // Stop interrupts
-  TIMSK2 = 0;
-  Serial.println("disabled interrupts");
+  //TIMSK2 = 0;
+  //Serial.println("disabled interrupts");
   Serial.flush();
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 1000; i++) {
     Serial.println(TCNT2);
-    delay(0);
+    Serial.println("sleeping...");
+    
+    // page 39 of manual for sleep mode table
+    set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+    
+    // disable 
+    power_adc_disable();
+    power_spi_disable();
+    power_timer0_disable();
+    power_timer1_disable();
+    //power_timer2_disable();
+    power_twi_disable();
+    Serial.flush();
+    cli();
+    if (TCNT2 == 254) {
+      TCNT2 = 0;
+      time_intervals++;
+    }
+    sleep_enable();
+    sleep_bod_disable();
+    sei();
+    sleep_cpu();
+    sleep_disable();
+    
+    power_timer0_enable();
+    Serial.println("awake");
+    i=0;
   }
 
 }

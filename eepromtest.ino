@@ -39,7 +39,7 @@ void setup(void) {
   writeEEPROM(address, 170);
   Serial.print(readEEPROM(address), DEC);
   Serial.println("RUNNING");
-  //initTCNT2();
+  initTCNT2();
 }
 
 void loop() {
