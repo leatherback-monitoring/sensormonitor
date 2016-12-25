@@ -4,7 +4,7 @@ void readSensor() {
   Serial.print(millis());
   Serial.println("Reading sensor");
   Serial.flush();
-  reading.time = millis();
+  reading.time = time_elapsed;
   reading.humidity = myHumidity.readHumidity();
   reading.temperature = myHumidity.readTemperature();
 
@@ -14,7 +14,7 @@ void readSensor() {
   Serial.flush();
   
   Serial.print("r: ");
-  Serial.print(millis());
+  Serial.print(reading.time);
   Serial.print(", ");
   Serial.print(reading.temperature, 1);
   Serial.print(",");

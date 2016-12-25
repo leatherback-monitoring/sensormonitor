@@ -4,6 +4,10 @@
 #include <avr/sleep.h>
 #include <avr/io.h>
 
+
+unsigned long time_elapsed = 0;
+
+
 ISR(WDT_vect)
 {
 }
@@ -14,7 +18,7 @@ void lowPowerize() {
   PORTD |= B11111100;      // enable pullups on pins 2 to 7, leave pins 0 and 1 alone
   PORTB |= B11111111;      // enable pullups on pins 8 to 13
 }
-boolean sleepWatchdogCount(unsigned long endTime) {
+boolean sleepTimer2Count(unsigned long endTime) {
   Serial.print("sleeping...");
   Serial.print(" wake up at ");
   Serial.print(endTime);
@@ -25,22 +29,41 @@ boolean sleepWatchdogCount(unsigned long endTime) {
 
   CLKPR = 0b10000100;
 
-  while (millis() < endTime) {
-    // Serial printing is so so so slow
-    //Serial.println("Z");
-    //Serial.flush();
-    digitalWrite(13, HIGH);
-    set_sleep_mode(SLEEP_MODE_IDLE);
+  while (time_elapsed < endTime) {
+    Serial.println(TCNT2);
+    Serial.println("sleeping...");
+    
+    Serial.flush();
+    
+    
+    // page 39 of manual for sleep mode table
+    set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+    
+    // disable unused peripherals
+    power_adc_disable();
+    power_spi_disable();
+    power_timer0_disable();
+    power_timer1_disable();
+    //power_timer2_disable();
+    power_twi_disable();
+    
+    
     cli();
+    if (TCNT2 == 254) {
+      TCNT2 = 0;
+      time_elapsed++;
+    }
     sleep_enable();
     sleep_bod_disable();
-
     sei();
+    
     sleep_cpu();
-
+    
     sleep_disable();
-    digitalWrite(13, LOW);
-    if (Serial.available()) break;
+    
+    power_timer0_enable();
+    power_twi_enable();
+    Serial.println("awake");
   }
 
   CLKPR = 0b10000000;
@@ -49,12 +72,11 @@ boolean sleepWatchdogCount(unsigned long endTime) {
   return true;
 }
 
-unsigned long time_intervals = 0;
 ISR(TIMER2_OVF_vect) {
-  time_intervals++;
+  time_elapsed++;
   digitalWrite(13, !digitalRead(13));
   Serial.print("Time is ");
-  Serial.println(time_intervals);
+  Serial.println(time_elapsed);
   //TIFR2 = 0;
 }
 
@@ -116,7 +138,7 @@ void initTCNT2() {
   
   // enable timer and set prescaler to /1024
   //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  TCCR2B = (1 << CS22) | (1 << CS21) | (0 << CS20); // /256 for debug
+  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");
@@ -132,36 +154,4 @@ void initTCNT2() {
   // Stop interrupts
   //TIMSK2 = 0;
   //Serial.println("disabled interrupts");
-  Serial.flush();
-  for (int i = 0; i < 1000; i++) {
-    Serial.println(TCNT2);
-    Serial.println("sleeping...");
-    
-    // page 39 of manual for sleep mode table
-    set_sleep_mode(SLEEP_MODE_PWR_SAVE);
-    
-    // disable 
-    power_adc_disable();
-    power_spi_disable();
-    power_timer0_disable();
-    power_timer1_disable();
-    //power_timer2_disable();
-    power_twi_disable();
-    Serial.flush();
-    cli();
-    if (TCNT2 == 254) {
-      TCNT2 = 0;
-      time_intervals++;
-    }
-    sleep_enable();
-    sleep_bod_disable();
-    sei();
-    sleep_cpu();
-    sleep_disable();
-    
-    power_timer0_enable();
-    Serial.println("awake");
-    i=0;
-  }
-
 }

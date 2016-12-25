@@ -24,16 +24,16 @@ unsigned long readingCount = 0;
 
 #define MAXCOUNT 4000
 HTU21D myHumidity;
-int startcount = 0;
+unsigned int startcount = 0;
 
 void setup(void) {
-  pinMode(9, OUTPUT);
+  pinMode(13, OUTPUT);
   Serial.begin(115200);
   Wire.begin();
-  //Wire.setClock(400000L);
+  Wire.setClock(400000L);
   //TWBR = 1;//((CPU_FREQ / TWI_FREQ_NUNCHUCK) - 16) / 2;
   myHumidity.begin();
-  digitalWrite(9, !digitalRead(9));
+  //digitalWrite(9, !digitalRead(9));
   Serial.println("Starting");
   unsigned int address = 0;
   writeEEPROM(address, 170);
@@ -42,6 +42,7 @@ void setup(void) {
   initTCNT2();
 }
 
+unsigned long target_time = 0;
 void loop() {
   findLastPoint();
   // start overwriting data if at end of memory
@@ -49,11 +50,14 @@ void loop() {
   Serial.println(startcount);
   for (int i = startcount; i < MAXCOUNT; i++) {
     Serial.flush();
-    digitalWrite(9, LOW);
-    if (!sleepWatchdogCount(millis() + 60000)) break;
+    digitalWrite(13, LOW);
+    
+    if (!sleepTimer2Count(target_time)) break;
+    
+    target_time += 25;  // 225=30*60/8
     
     Serial.println("A");
-    digitalWrite(9, HIGH);
+    digitalWrite(13, HIGH);
     readSensor();
     
     Serial.println("S");
