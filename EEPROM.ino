@@ -56,13 +56,14 @@ void chip_erase() {
   char empty[128];
   for (int i=0; i<128; i++) empty[i] = 0xff;
   Serial.print("Erasing");
+  /*
   for (int i=0; i<500; i++) { // 500=512000/8/128
     writeEEPROMBlock(i*128, empty, 128);
     if (i%50==0) Serial.print(".");
-  }/*
-  for (int i=0; i<200; i++) {
+  }*/
+  for (int i=0; i<64000; i++) { // 6400=500*128
     writeEEPROM(i, 0xff);
     if (i%50==0) Serial.print(".");
-  }*/
+  }
   Serial.println("Done");
 }

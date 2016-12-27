@@ -1,0 +1,22 @@
+##############################################################
+
+turtle.name=SAVE THE TURTLES!
+
+turtle.upload.tool=arduino:avrdude
+turtle.upload.protocol=arduino
+turtle.upload.maximum_size=30720
+turtle.upload.speed=57600
+
+turtle.bootloader.low_fuses=0xE2
+turtle.bootloader.high_fuses=0xDA
+turtle.bootloader.extended_fuses=0x05
+#turtle.bootloader.path=arduino:atmega
+turtle.bootloader.file=atmega/ATmegaBOOT_168_atmega328_pro_8MHz.hex
+turtle.bootloader.unlock_bits=0x3F
+turtle.bootloader.lock_bits=0x0F
+turtle.bootloader.tool=arduino:avrdude
+
+turtle.build.mcu=atmega328p
+turtle.build.f_cpu=8000000L
+turtle.build.core=arduino:arduino
+turtle.build.variant=arduino:standard
