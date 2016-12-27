@@ -5,8 +5,7 @@
 #include <avr/io.h>
 
 
-unsigned long time_elapsed = 0;
-
+// time_elapsed is defined in main file
 
 ISR(WDT_vect)
 {
@@ -49,10 +48,10 @@ boolean sleepTimer2Count(unsigned long endTime) {
     
     
     cli();
-    if (TCNT2 == 254) {
+    /*if (TCNT2 == 254) {
       TCNT2 = 0;
       time_elapsed++;
-    }
+    }*/
     sleep_enable();
     sleep_bod_disable();
     sei();
@@ -68,15 +67,18 @@ boolean sleepTimer2Count(unsigned long endTime) {
 
   CLKPR = 0b10000000;
 
-  if (Serial.available()) return false;
+  //if (Serial.available()) return false;
   return true;
 }
 
 ISR(TIMER2_OVF_vect) {
   time_elapsed++;
-  digitalWrite(13, !digitalRead(13));
+  // flash LED every 16 seconds
+  if (time_elapsed % 2 == 0) digitalWrite(13, HIGH);
+  
   Serial.print("Time is ");
   Serial.println(time_elapsed);
+  digitalWrite(13, LOW);
   //TIFR2 = 0;
 }
 
@@ -137,8 +139,8 @@ void initTCNT2() {
   // Start counter
   
   // enable timer and set prescaler to /1024
-  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
+  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  //TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");
