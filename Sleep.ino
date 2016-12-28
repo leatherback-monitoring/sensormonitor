@@ -17,12 +17,12 @@ void lowPowerize() {
   PORTD |= B11111100;      // enable pullups on pins 2 to 7, leave pins 0 and 1 alone
   PORTB |= B11111111;      // enable pullups on pins 8 to 13
 }
-boolean sleepTimer2Count(unsigned long endTime) {
+boolean sleep_timer2_count(unsigned long endTime) {
   Serial.print("sleeping...");
   Serial.print(" wake up at ");
   Serial.print(endTime);
   Serial.print(". now is ");
-  Serial.print(millis());
+  Serial.print(time_elapsed);
   Serial.println();
   Serial.flush();
 
@@ -139,8 +139,8 @@ void initTCNT2() {
   // Start counter
   
   // enable timer and set prescaler to /1024
-  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  //TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
+  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");

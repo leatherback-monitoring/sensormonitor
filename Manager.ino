@@ -1,4 +1,29 @@
-void readSensor() {
+int EEPROM_address(int count) {
+  DataPoint tmp;
+  int datasize = sizeof(tmp);
+  return count * datasize + HEADER_LEN;
+}
+
+unsigned int find_last_point() {
+  Serial.println(F("Finding start EEPROM pos"));
+  unsigned int count = 0;
+  while (readEEPROM(EEPROM_address(count)) != 0xff && count <= MAXCOUNT) {
+    if (count % 50 == 0) Serial.print(".");
+    digitalWrite(LED1, !digitalRead(LED1));
+    count++;
+  }
+  digitalWrite(LED1, LOW);
+  Serial.println();
+  Serial.print(F("Measurement number: "));
+  Serial.print(count);
+  Serial.print(F(", Offset = "));
+  Serial.print(EEPROM_address(count));
+  Serial.print(F(" bytes"));
+  Serial.println();
+  return count;
+}
+
+DataPoint read_sensor() {
 
   DataPoint reading;
   Serial.print(millis());
@@ -12,7 +37,7 @@ void readSensor() {
   Serial.print(millis());
   Serial.println("doner");
   Serial.flush();
-  
+
   Serial.print("r: ");
   Serial.print(reading.time);
   Serial.print(", ");
@@ -20,59 +45,58 @@ void readSensor() {
   Serial.print(",");
   Serial.print(reading.humidity, 1);
   Serial.println();
+  return reading;
+}
 
+void write_point(DataPoint reading, int reading_count) {
 
-
+  
   // Store data
   int datasize = sizeof(reading);
-  //Serial.println(datasize);
   char b[datasize];
   memcpy(b, &reading, datasize);
 
-  Serial.print(millis());
   Serial.println("writing memory");
-  Serial.flush();
   //writeEEPROMBlock(readingCount * datasize, b, datasize);
   for (int i = 0; i < datasize; i++) {
-    writeEEPROM(readingCount * datasize + i, b[i]);
+    writeEEPROM(EEPROM_address(reading_count) + i, b[i]);
   }
-  
-  Serial.print(millis());
   Serial.println("donew");
-  Serial.flush();
-  readingCount++;
 }
 
-boolean displayReading(int reading) {
+boolean display_reading(int reading) {
 
   DataPoint tmp; //Re-make the struct
   int datasize = sizeof(tmp);
   char b[datasize];
 
-  readEEPROMBlock(reading * datasize, b, datasize);
+
   /*  for (int i = 0; i < datasize; i++) {
       b[i] = readEEPROM(reading * datasize + i);
     }*/
 
-  memcpy(&tmp, b, datasize);
+  readEEPROMBlock(EEPROM_address(reading), b, datasize);
+
+
+  memcpy(&tmp, &b, datasize);
   Serial.print(tmp.time);
   Serial.print(",");
   Serial.print(tmp.temperature);
   Serial.print(",");
   Serial.print(tmp.humidity);
-
   Serial.println();
-  if (tmp.time > 4294967294) return false;
+
+  if (tmp.time >= 0xffffffff) return false;
   else return true;
 }
 
-boolean displayReadings(int reading, int count) {
+boolean display_readings(int reading, int count) {
 
   DataPoint tmp[count]; //Re-make the struct
   int datasize = sizeof(tmp);
   char b[datasize];
 
-  readEEPROMBlock(reading * datasize, b, datasize);
+  readEEPROMBlock(EEPROM_address(reading), b, datasize);
   /*  for (int i = 0; i < datasize; i++) {
       b[i] = readEEPROM(reading * datasize + i);
     }*/
