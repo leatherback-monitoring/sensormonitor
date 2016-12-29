@@ -130,8 +130,8 @@ void handle_serial() {
   byte block2[BLOCK_SIZE];
  Serial.println("TESTING");
   
-    writeEEPROMBlock(0, block, BLOCK_SIZE);
-    readEEPROMBlock(0, block2, BLOCK_SIZE);
+    writeEEPROMBlock(0, block, 128);
+    readEEPROMBlock(0, block2, 128);
   for (int i=0; i<BLOCK_SIZE; i++) {
     Serial.print(i);
     Serial.print(", ");

@@ -139,8 +139,8 @@ void initTCNT2() {
   // Start counter
   
   // enable timer and set prescaler to /1024
-  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
+  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  //TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");
