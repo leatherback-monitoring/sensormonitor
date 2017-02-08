@@ -1,4 +1,3 @@
-
 #include <avr/interrupt.h>
 #include <avr/power.h>
 #include <avr/sleep.h>
@@ -11,7 +10,7 @@ ISR(WDT_vect)
 {
 }
 
-void lowPowerize() {
+void low_powerize() {
   DDRD &= B00000011;       // set Arduino pins 2 to 7 as inputs, leaves 0 & 1 (RX & TX) as is
   DDRB = B00000000;        // set pins 8 to 13 as inputs
   PORTD |= B11111100;      // enable pullups on pins 2 to 7, leave pins 0 and 1 alone

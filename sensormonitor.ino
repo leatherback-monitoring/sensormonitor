@@ -1,7 +1,11 @@
-#include <Wire.h>
-
-#include "SparkFunHTU21D.h"
 #define EEPROM_ADDR 0x50    //Address of 24LC256 eeprom chip
+#define LED1 13
+#define BLOCK_SIZE 128
+#define HEADER_BLOCKS 1
+#define HEADER_LEN HEADER_BLOCKS * BLOCK_SIZE
+
+#include <Wire.h>
+#include "SparkFunHTU21D.h"
 
 #include <avr/interrupt.h>
 #include <avr/power.h>
@@ -63,13 +67,13 @@ void loop() {
     digitalWrite(13, LOW);
 
     // Sleep and break from loop if recieved serial input
-    if (!sleepTimer2Count(target_time)) break;
+    if (!sleep_timer2_count(target_time)) break;
 
     target_time += 75; // 75=10 minutes  // 225=30*60/8
 
     Serial.println("A");
     digitalWrite(13, HIGH);
-    readSensor();
+    read_sensor();
 
     Serial.println("S");
     //delay(500);
@@ -77,7 +81,6 @@ void loop() {
 }
 
 void handle_serial() {
-
   long i = 0;
   while (Serial.available()) {
     switch (Serial.read()) {
@@ -85,7 +88,7 @@ void handle_serial() {
         chip_erase();
         break;
       case 'r':
-        while (displayReading(i) && i < MAXCOUNT) i++;
+        while (display_reading(i) && i < MAXCOUNT) i++;
         //while (displayReadings(i,2) && i < MAXCOUNT) i+=2;
         break;
       default:
