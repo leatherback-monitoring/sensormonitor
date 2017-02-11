@@ -16,6 +16,7 @@ void low_powerize() {
   PORTD |= B11111100;      // enable pullups on pins 2 to 7, leave pins 0 and 1 alone
   PORTB |= B11111111;      // enable pullups on pins 8 to 13
 }
+
 boolean sleep_timer2_count(unsigned long endTime) {
   Serial.print("sleeping...");
   Serial.print(" wake up at ");
@@ -73,7 +74,7 @@ boolean sleep_timer2_count(unsigned long endTime) {
 ISR(TIMER2_OVF_vect) {
   time_elapsed++;
   // flash LED every 16 seconds
-  if (time_elapsed % 2 == 0) digitalWrite(13, HIGH);
+  if (1 || time_elapsed % 2 == 0) digitalWrite(13, HIGH);
   
   Serial.print("Time is ");
   Serial.println(time_elapsed);
@@ -91,7 +92,7 @@ ISR(TIMER2_COMPA_vect) {
   Serial.println(millis());
 }*/
 
-void initTCNT2() {
+void init_TCNT2() {
   // *tries to* initialize timer2 in accoranace with datasheet page 151 for asynchronous operation
   // http://www.atmel.com/images/Atmel-8271-8-bit-AVR-Microcontroller-ATmega48A-48PA-88A-88PA-168A-168PA-328-328P_datasheet_Complete.pdf
   
@@ -138,8 +139,8 @@ void initTCNT2() {
   // Start counter
   
   // enable timer and set prescaler to /1024
-  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  //TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
+  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");
@@ -151,7 +152,7 @@ void initTCNT2() {
   // Start interrupts
   TIMSK2 |= (1 << TOIE2);
   //delay(10000);
-  
+
   // Stop interrupts
   //TIMSK2 = 0;
   //Serial.println("disabled interrupts");

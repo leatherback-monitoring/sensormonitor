@@ -1,4 +1,4 @@
-int EEPROM_address(int count) {
+int EEPROM_address(long count) {
   DataPoint tmp;
   int datasize = sizeof(tmp);
   return count * datasize + HEADER_LEN;
@@ -6,7 +6,7 @@ int EEPROM_address(int count) {
 
 unsigned int find_last_point() {
   Serial.println(F("Finding start EEPROM pos"));
-  unsigned int count = 0;
+  unsigned long count = 0;
   while (readEEPROM(EEPROM_address(count)) != 0xff && count <= MAXCOUNT) {
     if (count % 50 == 0) Serial.print(".");
     digitalWrite(LED1, !digitalRead(LED1));
@@ -24,7 +24,6 @@ unsigned int find_last_point() {
 }
 
 DataPoint read_sensor() {
-
   DataPoint reading;
   Serial.print(millis());
   Serial.println("Reading sensor");
@@ -48,9 +47,7 @@ DataPoint read_sensor() {
   return reading;
 }
 
-void write_point(DataPoint reading, int reading_count) {
-
-  
+void write_point(DataPoint reading, long reading_count) {
   // Store data
   int datasize = sizeof(reading);
   char b[datasize];
@@ -64,7 +61,7 @@ void write_point(DataPoint reading, int reading_count) {
   Serial.println("donew");
 }
 
-boolean display_reading(int reading) {
+boolean display_reading(long reading) {
 
   DataPoint tmp; //Re-make the struct
   int datasize = sizeof(tmp);
@@ -90,7 +87,7 @@ boolean display_reading(int reading) {
   else return true;
 }
 
-boolean display_readings(int reading, int count) {
+boolean display_readings(long reading, int count) {
 
   DataPoint tmp[count]; //Re-make the struct
   int datasize = sizeof(tmp);

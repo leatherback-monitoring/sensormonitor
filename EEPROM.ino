@@ -1,6 +1,6 @@
 
 
-void writeEEPROM(unsigned int eeaddress, byte data ) {
+void writeEEPROM(unsigned long eeaddress, byte data ) {
   Wire.beginTransmission(EEPROM_ADDR);
   Wire.write((int)(eeaddress >> 8));   // MSB
   Wire.write((int)(eeaddress & 0xFF)); // LSB
@@ -9,7 +9,7 @@ void writeEEPROM(unsigned int eeaddress, byte data ) {
   delay(5);
 }
 
-byte writeEEPROMBlock(unsigned int eeaddress, char *data, int len) {
+byte writeEEPROMBlock(unsigned long eeaddress, char *data, int len) {
   Wire.beginTransmission(EEPROM_ADDR);
   Wire.write((int)(eeaddress >> 8));   // MSB
   Wire.write((int)(eeaddress & 0xFF)); // LSB
@@ -35,7 +35,7 @@ byte writeEEPROMBlock(unsigned int eeaddress, char *data, int len) {
   return 0;
 }
 
-byte readEEPROM(unsigned int eeaddress ) {
+byte readEEPROM(unsigned long eeaddress ) {
   byte rdata = 0xFF;
 
   Wire.beginTransmission(EEPROM_ADDR);
@@ -50,7 +50,7 @@ byte readEEPROM(unsigned int eeaddress ) {
   return rdata;
 }
 
-void readEEPROMBlock(unsigned int eeaddress, char *data, int len) {
+void readEEPROMBlock(unsigned long eeaddress, char *data, long len) {
 
   Wire.beginTransmission(EEPROM_ADDR);
   Wire.write((int)(eeaddress >> 8));   // MSB
@@ -71,7 +71,7 @@ void chip_erase() {
   for (int i=0; i<BLOCK_SIZE; i++) empty[i] = 0xff;
   Serial.print("Erasing");
   
-  for (int i=HEADER_LEN/BLOCK_SIZE; i<500; i++) { // 500=512000/8/128
+  for (long i=HEADER_LEN/BLOCK_SIZE; i<500; i++) { // 500=512000/8/128
     writeEEPROMBlock(i*BLOCK_SIZE/2, empty, BLOCK_SIZE/2);
     if (i%50==0) Serial.print(".");
     delay(1);

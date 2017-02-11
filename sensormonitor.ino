@@ -17,7 +17,7 @@ struct DataPoint {
   float temperature;
   float humidity;
   float filler;
-};  // length must be factor of 128
+};  // length must be factor of BLOCK_SIZE
 
 struct Header {
   unsigned long id;
@@ -50,12 +50,12 @@ void setup(void) {
   while (millis() < 5000) handle_serial();
   Serial.println("Continuing");
 
-  initTCNT2();
+  init_TCNT2();
 }
 
 unsigned long target_time = 0;
 void loop() {
-  findLastPoint();
+  find_last_point();
 
   // start overwriting data if at end of memory
   if (startcount >= MAXCOUNT) startcount = 0;
@@ -69,7 +69,7 @@ void loop() {
     // Sleep and break from loop if recieved serial input
     if (!sleep_timer2_count(target_time)) break;
 
-    target_time += 75; // 75=10 minutes  // 225=30*60/8
+    target_time += 20; // 75=10 minutes  // 225=30*60/8
 
     Serial.println("A");
     digitalWrite(13, HIGH);
@@ -97,19 +97,3 @@ void handle_serial() {
   }
 }
 
-void findLastPoint() {
-  DataPoint tmp;
-  int datasize = sizeof(tmp);
-  Serial.println(F("Finding start EEPROM pos"));
-  while (readEEPROM(startcount * datasize) != 0xff && startcount < MAXCOUNT) {
-    if (startcount % 50 == 0) Serial.print(".");
-    startcount++;
-  }
-  Serial.println();
-  Serial.print(F("Measurement number: "));
-  Serial.print(startcount);
-  Serial.print(F(", Offset = "));
-  Serial.print(startcount * datasize);
-  Serial.print(F(" bytes"));
-  Serial.println();
-}
