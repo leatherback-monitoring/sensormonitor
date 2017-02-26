@@ -82,7 +82,7 @@ ISR(TIMER2_OVF_vect) {
   //TIFR2 = 0;
 }
 
-/* 
+/*
 ISR(TIMER2_COMPA_vect) {
   digitalWrite(13, !digitalRead(13));
   Serial.println("compare ");
@@ -139,8 +139,8 @@ void init_TCNT2() {
   // Start counter
   
   // enable timer and set prescaler to /1024
-  //TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-  TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
+  TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+  //TCCR2B = (0 << CS22) | (1 << CS21) | (1 << CS20); // /256 for debug
   
   // wait for clock to stabilize
   Serial.println("Waiting for clock...");
@@ -152,6 +152,9 @@ void init_TCNT2() {
   // Start interrupts
   TIMSK2 |= (1 << TOIE2);
   //delay(10000);
+  for (int i=0; i<100; i++) {
+    
+  }
 
   // Stop interrupts
   //TIMSK2 = 0;

@@ -33,11 +33,14 @@ unsigned int startcount = 0;
 
 void setup(void) {
   pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
+  digitalWrite(13, HIGH);
   Serial.begin(115200);
+  
+  Serial.println("RUNNING");
+  
   Wire.begin();
   Wire.setClock(400000L);
-  //TWBR = 1;//((CPU_FREQ / TWI_FREQ_NUNCHUCK) - 16) / 2;
+  Serial.println("init htu");
   myHumidity.begin();
   //digitalWrite(9, !digitalRead(9));
   Serial.println("Starting");
@@ -49,6 +52,7 @@ void setup(void) {
   Serial.println("Waiting for computer connection...");
   while (millis() < 5000) handle_serial();
   Serial.println("Continuing");
+  digitalWrite(13, LOW);
 
   init_TCNT2();
 }
@@ -64,12 +68,12 @@ void loop() {
   Serial.println(startcount);
   for (int i = startcount; i < MAXCOUNT; i++) {
     Serial.flush();
-    digitalWrite(13, LOW);
+    digitalWrite(13, LOW); 
 
     // Sleep and break from loop if recieved serial input
     if (!sleep_timer2_count(target_time)) break;
 
-    target_time += 20; // 75=10 minutes  // 225=30*60/8
+    target_time += 225; // 75=10 minutes  // 225=30*60/8
 
     Serial.println("A");
     digitalWrite(13, HIGH);
