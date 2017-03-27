@@ -27,13 +27,13 @@ unsigned long time_elapsed = 0;
 
 unsigned long readingCount = 0;
 
-#define MAXCOUNT 4000
+#define MAXCOUNT 3992
 HTU21D myHumidity;
 unsigned int startcount = 0;
 
 void setup(void) {
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
+  pinMode(LED1, OUTPUT);
+  digitalWrite(LED1, HIGH);
   Serial.begin(115200);
   
   Serial.println("RUNNING");
@@ -52,7 +52,7 @@ void setup(void) {
   Serial.println("Waiting for computer connection...");
   while (millis() < 5000) handle_serial();
   Serial.println("Continuing");
-  digitalWrite(13, LOW);
+  digitalWrite(LED1, LOW);
 
   init_TCNT2();
 }
@@ -68,7 +68,7 @@ void loop() {
   Serial.println(startcount);
   for (int i = startcount; i < MAXCOUNT; i++) {
     Serial.flush();
-    digitalWrite(13, LOW); 
+    digitalWrite(LED1, LOW); 
 
     // Sleep and break from loop if recieved serial input
     if (!sleep_timer2_count(target_time)) break;
@@ -76,8 +76,8 @@ void loop() {
     target_time += 225; // 75=10 minutes  // 225=30*60/8
 
     Serial.println("A");
-    digitalWrite(13, HIGH);
-    read_sensor();
+    digitalWrite(LED1, HIGH);
+    write_point(read_sensor(), i);
 
     Serial.println("S");
     //delay(500);
@@ -89,6 +89,7 @@ void handle_serial() {
   while (Serial.available()) {
     switch (Serial.read()) {
       case 'e':
+      case 'd':
         chip_erase();
         break;
       case 'r':
@@ -99,5 +100,6 @@ void handle_serial() {
         break;
     }
   }
+  digitalWrite(LED1, millis()%200<100);
 }
 

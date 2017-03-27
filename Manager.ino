@@ -12,6 +12,7 @@ unsigned int find_last_point() {
     digitalWrite(LED1, !digitalRead(LED1));
     count++;
   }
+  
   digitalWrite(LED1, LOW);
   Serial.println();
   Serial.print(F("Measurement number: "));
