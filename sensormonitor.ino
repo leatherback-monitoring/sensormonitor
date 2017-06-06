@@ -25,11 +25,10 @@ struct Header {
 
 unsigned long time_elapsed = 0;
 
-unsigned long readingCount = 0;
 
 #define MAXCOUNT 3992
 HTU21D myHumidity;
-unsigned int startcount = 0;
+unsigned int start_count = 0;
 
 void setup(void) {
   pinMode(LED1, OUTPUT);
@@ -59,21 +58,21 @@ void setup(void) {
 
 unsigned long target_time = 0;
 void loop() {
-  find_last_point();
+  start_count = find_last_point();
 
   // start overwriting data if at end of memory
-  if (startcount >= MAXCOUNT) startcount = 0;
+  if (start_count >= MAXCOUNT) start_count = 0;
 
   Serial.print("Starting at: ");
-  Serial.println(startcount);
-  for (int i = startcount; i < MAXCOUNT; i++) {
+  Serial.println(start_count);
+  for (int i = start_count; i < MAXCOUNT; i++) {
     Serial.flush();
     digitalWrite(LED1, LOW); 
 
     // Sleep and break from loop if recieved serial input
     if (!sleep_timer2_count(target_time)) break;
 
-    target_time += 225; // 75=10 minutes  // 225=30*60/8
+    target_time += 2; // 75=10 minutes  // 225=30*60/8
 
     Serial.println("A");
     digitalWrite(LED1, HIGH);
